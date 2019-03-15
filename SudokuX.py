@@ -8,6 +8,50 @@ Created on Fri Mar 15 11:00:03 2019
 from simpleai.search import SearchProblem, astar
 import numpy as np
 
+
+
+
+"""
+SIMPLE IA CODE
+"""   
+class SudokuXProblem(SearchProblem):
+    
+    def actions(self,state):
+        
+        
+    def result(self,state):
+        
+
+    def is_goal(self, state):
+        
+
+    def heuristic(self, state):
+       
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+CONDICIONES Y UTILIDADES
+"""
 def StringToArray(string):
     my_list =np.zeros((6,6))
     row=0
@@ -74,13 +118,70 @@ def PossibleInDiagSec(table):
                 _myList.append(table[x][y])
     return set(possibility)-set(_myList)  
 
-       
+def PossibleInGroup(table,row,column):
+    _myList= []
+    possibility = list(range(1,7))     
     
+    if(row<=1 and column<=2):
+        for y in range (0,2):
+            for x in range(0,3):
+                if(table[x][y]!=0):
+                  _myList.append(table[x][y])
+                
+    if(row<=1 and column>2):
+        for y in range (0,2):
+            for x in range(3,6):
+                if(table[x][y]!=0):
+                  _myList.append(table[x][y])
+    
+    
+    if(row>1 and row <4 and column<=2):
+        for y in range (2,4):
+            for x in range(0,3):
+                if(table[x][y]!=0):
+                  _myList.append(table[x][y])
+    
+    if(row>1 and row <4 and  column>2):
+        for y in range (2,4):
+            for x in range(3,6):
+                if(table[x][y]!=0):
+                  _myList.append(table[x][y])
+    
+    
+    
+    
+    if(row>5 and column<=2):
+        for y in range (4,6):
+            for x in range(0,3):
+                if(table[x][y]!=0):
+                  _myList.append(table[x][y])
+    
+    if(row>5 and column>2):
+        for y in range (4,6):
+            for x in range(3,6):
+                if(table[x][y]!=0):
+                  _myList.append(table[x][y])
+    
+    
+    return set(possibility)-set(_myList)  
+
+
+def IsComplete(table):
+    for x in range (0,6):
+        for y in range (0,6):
+            if(table[x][y]==0):
+             return False
+    
+    return True
+
+    
+
 initialState="1,0,0,0,4,0;6,0,0,2,0,0;0,0,0,0,0,4;0,0,2,0,0,0;0,3,1,0,0,0;4,0,0,0,3,2"
 print(PossibleInRow(0,StringToArray(initialState)))
 print(PossibleInColumn(0,StringToArray(initialState)))
 print(PossibleInDiagPrin(StringToArray(initialState)))
 print(PossibleInDiagSec(StringToArray(initialState)))
+print(PossibleInGroup(StringToArray(initialState),2,0))
 
 
 
