@@ -66,85 +66,55 @@ def PossibleInColumn(column,table):
     return set(possibility)-set(_myList)       
     
  
-def PossibleInDiagPrin(table):
-    _myList= []
-    possibility = list(range(1,7))
-    for x in range (0,6):
-        if(table[x][x]!=0):
-            _myList.append(table[x][x])
-    
-    return set(possibility)-set(_myList)  
+def PossibleInDiag(temp, row, col):
+    diag="1,0,0,0,0,2;0,1,0,0,2,0;0,0,1,2,0,0;0,0,2,1,0,0;0,2,0,0,1,0;2,0,0,0,0,1"
+    tg= StringToArray(diag)
+    selec=tg[row][col]
+    emptySet={}
+    Poss= list(range(1,7))
+    Actual=[]
+    if selec != 0:
+        for x in range(0,6):
+            for y in range(0,6):
+                if selec == tg[x][y] and temp[x][y] != 0:
+                    Actual.append(temp[x][y])
+                    
+        return set(Poss)-set(Actual)
+    else:
+        return emptySet
 
-def PossibleInDiagSec(table):
-    _myList= []
-    possibility = list(range(1,7))
-    for x in range (0,6):
-        for y in range (0,6):
-            if(table[x][y]!=0 and (x+y+1)==6):
-                _myList.append(table[x][y])
-    return set(possibility)-set(_myList)  
-
-def PossibleInGroup(table,row,column):
-    _myList= []
-    possibility = list(range(1,7))     
+def PossibleInGroup(temp,row,col):
+    groups="1,1,1,2,2,2;1,1,1,2,2,2;3,3,3,4,4,4;3,3,3,4,4,4;5,5,5,6,6,6;5,5,5,6,6,6"
+    tg= StringToArray(groups)
+    selec=tg[row][col]
     
-    if(row<=1 and column<=2):
-        for y in range (0,2):
-            for x in range(0,3):
-                if(table[x][y]!=0):
-                  _myList.append(table[x][y])
-                
-    if(row<=1 and column>2):
-        for y in range (0,2):
-            for x in range(3,6):
-                if(table[x][y]!=0):
-                  _myList.append(table[x][y])
+    Poss= list(range(1,7))
+    Actual=[]
     
-    
-    if(row>1 and row <4 and column<=2):
-        for y in range (2,4):
-            for x in range(0,3):
-                if(table[x][y]!=0):
-                  _myList.append(table[x][y])
-    
-    if(row>1 and row <4 and  column>2):
-        for y in range (2,4):
-            for x in range(3,6):
-                if(table[x][y]!=0):
-                  _myList.append(table[x][y])
-    
-    
-    
-    
-    if(row>5 and column<=2):
-        for y in range (4,6):
-            for x in range(0,3):
-                if(table[x][y]!=0):
-                  _myList.append(table[x][y])
-    
-    if(row>5 and column>2):
-        for y in range (4,6):
-            for x in range(3,6):
-                if(table[x][y]!=0):
-                  _myList.append(table[x][y])
-    
-    
-    return set(possibility)-set(_myList)  
+    for x in range(0,6):
+        for y in range(0,6):
+            if selec == tg[x][y] and temp[x][y] != 0:
+                Actual.append(temp[x][y])
+    return set(Poss)-set(Actual)  
 
 
 def IsComplete(table):
-    for x in range (0,6):
+    
+    if table.all() == 0:
+        return False
+    return True
+    '''for x in range (0,6):
         for y in range (0,6):
             if(table[x][y]==0):
-             return False
+                return False
     
-    return True
+    return True'''
 
 def NextEmptyCell(table):
     for x in range (0,6):
         for y in range (0,6):
             if(table[x][y]==0):
-             return x,y
+                return x,y
     
 
 """
@@ -160,41 +130,22 @@ class SudokuXProblem(SearchProblem):
         numRow=PossibleInRow(row,temp)
         numColumn=PossibleInColumn(column,temp)
         numGroup=PossibleInGroup(temp,row,column)
-       
+        numDiag = PossibleInDiag(temp,row,column)
         
-       
-        if row == column :
-            
-            numDiag =  PossibleInDiagPrin(temp)
-            possibility = numRow.intersection(numColumn,numGroup,numDiag)
-            
-            return list(possibility)
-        
-        elif row + column + 1 == 6:
-            
-            numDiag = PossibleInDiagSec(temp)
-            possibility = numRow.intersection(numColumn,numGroup,numDiag)
-           
-            return list(possibility)
-        else :
+        if numDiag.__len__() != 0:
+            possibility=numRow.intersection(numColumn,numGroup,numDiag)
+        else:
             possibility=numRow.intersection(numColumn,numGroup)
-           
-            return list(possibility)
+        
+        return list(possibility)
         
         
     def result(self,state,action):
-        
         temp= StringToArray(state)
         row,column = NextEmptyCell(temp)
-  
-    
-        print(action)
         temp[row][column]=action
         
         state= ArrayToString(temp)
-        
-        print("//new Array")
-        print(state)
         return state
         
         
@@ -218,15 +169,19 @@ class SudokuXProblem(SearchProblem):
                 
    
      
-initialState="1,0,0,0,4,0;6,0,0,2,0,0;0,0,0,0,0,4;0,0,2,0,0,0;0,3,1,0,0,0;4,0,0,0,3,2"
-print(initialState)
-print(ArrayToString(StringToArray(initialState)))
+is1="0,5,0,0,0,0;6,0,3,0,0,0;0,3,0,0,0,0;0,0,0,0,6,0;0,0,0,6,0,1;0,0,0,0,2,0"
+is2="0,0,1,0,0,0;0,0,0,6,0,0;1,0,0,0,3,0;0,4,0,0,0,2;0,0,2,0,0,0;0,0,0,2,0,0"
+is3="0,0,3,0,0,0;1,0,0,0,0,0;0,2,0,0,0,1;5,0,0,0,4,0;0,0,0,0,0,4;0,0,0,5,0,0"
+is4="0,0,0,3,0,0;0,0,3,0,0,0;2,0,0,0,5,0;0,3,0,0,0,1;0,0,0,6,0,0;0,0,4,0,0,0"
+is5="0,2,0,0,0,0;4,0,6,0,0,0;0,1,0,0,0,0;0,0,0,0,4,0;0,0,0,4,0,5;0,0,0,0,3,0"
 
-my_problem = SudokuXProblem(initial_state=initialState)
+
+
+my_problem = SudokuXProblem(initial_state=is5)
 result = astar(my_problem)
 
-
 print(result)
+
 """
 for action, state in result.path():
     print('Insert number', action)
