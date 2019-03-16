@@ -34,8 +34,15 @@ def StringToArray(string):
 
 def ArrayToString(my_list):
     converter =""
-    for x in my_list:
-        converter=converter+x
+    for x in range (0,6):
+        for  y in range (0,6):
+            if(y<5):
+                converter=converter+str(int(my_list[x][y]))+","
+            else:
+                if(x<5):
+                    converter=converter+str(int(my_list[x][y]))+";"
+                else:
+                     converter=converter+str(int(my_list[x][y]))
     return converter   
 
 def PossibleInRow(row,table):
@@ -148,33 +155,46 @@ SIMPLE IA CODE
 class SudokuXProblem(SearchProblem):
     
     def actions(self,state):
-        row,column = NextEmptyCell(state)
-        numRow=PossibleInRow(row,state)
-        numColumn=PossibleInColumn(column,state)
-        numGroup=PossibleInGroup(state,row,column)
+        temp= StringToArray(state)
+        row,column = NextEmptyCell(temp)
+        numRow=PossibleInRow(row,temp)
+        numColumn=PossibleInColumn(column,temp)
+        numGroup=PossibleInGroup(temp,row,column)
        
         
-        possibility=numRow.intersection(numColumn,numGroup)
+       
         if row == column :
             
-            numDiag =  PossibleInDiagPrin(state)
+            numDiag =  PossibleInDiagPrin(temp)
             possibility = numRow.intersection(numColumn,numGroup,numDiag)
+            
             return list(possibility)
         
         elif row + column + 1 == 6:
             
-            numDiag = PossibleInDiagSec(state)
+            numDiag = PossibleInDiagSec(temp)
             possibility = numRow.intersection(numColumn,numGroup,numDiag)
+           
             return list(possibility)
         else :
+            possibility=numRow.intersection(numColumn,numGroup)
+           
             return list(possibility)
         
         
     def result(self,state,action):
         
-        row,column = NextEmptyCell(state)
-        state[row][column]=action
-            
+        temp= StringToArray(state)
+        row,column = NextEmptyCell(temp)
+  
+    
+        print(action)
+        temp[row][column]=action
+        
+        state= ArrayToString(temp)
+        
+        print("//new Array")
+        print(state)
         return state
         
         
@@ -182,28 +202,34 @@ class SudokuXProblem(SearchProblem):
         return 1
     
     def is_goal(self, state):
-        return IsComplete(state)
+        temp= StringToArray(state)
+        return IsComplete(temp)
 
     def heuristic(self, state):
         
         h=0
         
-        print(len(state))
+        temp= StringToArray(state)
         for x in range (0,6):
             for y in range(0,6):
-                if state[x][y] == 0 :
+                if temp[x][y] == 0 :
                     h=h+1
         return h
                 
    
      
-
 initialState="1,0,0,0,4,0;6,0,0,2,0,0;0,0,0,0,0,4;0,0,2,0,0,0;0,3,1,0,0,0;4,0,0,0,3,2"
+print(initialState)
+print(ArrayToString(StringToArray(initialState)))
 
-my_problem = SudokuXProblem(initial_state=StringToArray(initialState))
+my_problem = SudokuXProblem(initial_state=initialState)
 result = astar(my_problem)
+
+
+print(result)
+"""
 for action, state in result.path():
     print('Insert number', action)
 print(state)
-
+"""
     
