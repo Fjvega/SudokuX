@@ -1,4 +1,4 @@
-
+## Sudoku X
 Code implemented in python for Sudoku X problems of size 6x6. Applying search to * for the search of the solution.
 
 
