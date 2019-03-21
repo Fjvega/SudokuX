@@ -10,6 +10,7 @@ from simpleai.search import SearchProblem, astar
 from __future__ import print_function
 """
 import numpy as np
+import time
 
 """
 CONDICIONES Y UTILIDADES
@@ -101,8 +102,11 @@ def PossibleInGroup(temp,row,col):
     return set(Poss)-set(Actual)  
 
 
+            
+
+            
+            
 def IsComplete(table):
-    
     if table.all() == 0:
         return False
     return True
@@ -113,13 +117,42 @@ def IsComplete(table):
     
     return True'''
 
-def NextEmptyCell(table):
-    for x in range (0,6):
-        for y in range (0,6):
-            if(table[x][y]==0):
-                return x,y
+def BestMatch(temp):
+    """
+    temp= StringToArray(state)
+    """
+    bestmatch = 999
+    rr=0
+    rc=0
+    for row in range (0,6):
+        for column in range (0,6):
+            if(temp[row][column]==0):
+                
+                numRow=PossibleInRow(row,temp)
+                numColumn=PossibleInColumn(column,temp)
+                numGroup=PossibleInGroup(temp,row,column)
+                numDiag = PossibleInDiag(temp,row,column)
+                if numDiag.__len__() != 0:
+                    possibility=numRow.intersection(numColumn,numGroup,numDiag)
+                else:
+                    possibility=numRow.intersection(numColumn,numGroup)
+                
+                
+                if(possibility.__len__()<=bestmatch and possibility.__len__()>0):
+                    bestmatch= possibility.__len__()
+                    rr=row;
+                    rc=column
     
-
+    return rr,rc
+    
+def NextEmptyCell(table):
+    
+    for row in range (0,6):
+        for column in range(0,6):
+            if(table[row][column]==0):
+                return row,column
+            
+            
 """
 SIMPLE IA CODE
 """
@@ -129,14 +162,21 @@ class SudokuXProblem(SearchProblem):
     
     def actions(self,state):
         temp= StringToArray(state)
+        
+        """
+        row,column = BestMatch(temp)
+        """
+        
+        
         row,column = NextEmptyCell(temp)
+        
         numRow=PossibleInRow(row,temp)
         numColumn=PossibleInColumn(column,temp)
         numGroup=PossibleInGroup(temp,row,column)
         numDiag = PossibleInDiag(temp,row,column)
         
         print("NEW STATE")
-        print("En la casilla :")
+        print("Se va a expandir en la posición :")
         print(str(row)+","+str(column))
         
         
@@ -147,15 +187,20 @@ class SudokuXProblem(SearchProblem):
         
         print("Estado actual")
         print(StringToArray(state))
-        print("Expande a :")
+        print("Con las siguientes posibilidades")
         print(list(possibility))
-
+        
         return list(possibility)
         
         
     def result(self,state,action):
         temp= StringToArray(state)
+        
+        """
+        row,column = BestMatch(temp)
+        """
         row,column = NextEmptyCell(temp)
+        
         temp[row][column]=action
         
         state= ArrayToString(temp)
@@ -190,15 +235,18 @@ is5="0,2,0,0,0,0;4,0,6,0,0,0;0,1,0,0,0,0;0,0,0,0,4,0;0,0,0,4,0,5;0,0,0,0,3,0"
 
 
 
-my_problem = SudokuXProblem(initial_state=is5)
+millis = int(round(time.time() * 1000))
+my_problem = SudokuXProblem(initial_state=is1)
 result = astar(my_problem)
 
+print(result)
 
+millis2 = int(round(time.time() * 1000))
 
-
-print("SOLUCION")
+print(millis2-millis)
+"""
 for action, state in result.path():
     print('Insert number', action)
     print(StringToArray(state))
-
-    
+"""    
+   
