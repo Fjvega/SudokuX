@@ -6,6 +6,9 @@ Created on Fri Mar 15 11:00:03 2019
 """
 
 from simpleai.search import SearchProblem, astar
+"""
+from __future__ import print_function
+"""
 import numpy as np
 
 """
@@ -132,11 +135,21 @@ class SudokuXProblem(SearchProblem):
         numGroup=PossibleInGroup(temp,row,column)
         numDiag = PossibleInDiag(temp,row,column)
         
+        print("NEW STATE")
+        print("En la casilla :")
+        print(str(row)+","+str(column))
+        
+        
         if numDiag.__len__() != 0:
             possibility=numRow.intersection(numColumn,numGroup,numDiag)
         else:
             possibility=numRow.intersection(numColumn,numGroup)
         
+        print("Estado actual")
+        print(StringToArray(state))
+        print("Expande a :")
+        print(list(possibility))
+
         return list(possibility)
         
         
@@ -180,11 +193,12 @@ is5="0,2,0,0,0,0;4,0,6,0,0,0;0,1,0,0,0,0;0,0,0,0,4,0;0,0,0,4,0,5;0,0,0,0,3,0"
 my_problem = SudokuXProblem(initial_state=is5)
 result = astar(my_problem)
 
-print(result)
 
-"""
+
+
+print("SOLUCION")
 for action, state in result.path():
     print('Insert number', action)
-print(state)
-"""
+    print(StringToArray(state))
+
     
