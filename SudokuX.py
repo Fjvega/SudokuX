@@ -124,6 +124,7 @@ def BestMatch(temp):
     bestmatch = 999
     rr=0
     rc=0
+    rpossibility = {}
     for row in range (0,6):
         for column in range (0,6):
             if(temp[row][column]==0):
@@ -142,8 +143,9 @@ def BestMatch(temp):
                     bestmatch= possibility.__len__()
                     rr=row;
                     rc=column
+                    rpossibility =possibility
     
-    return rr,rc
+    return rr,rc,rpossibility
     
 def NextEmptyCell(table):
     
@@ -163,11 +165,58 @@ class SudokuXProblem(SearchProblem):
     def actions(self,state):
         temp= StringToArray(state)
         
-        """
-        row,column = BestMatch(temp)
-        """
+        
+        row,column,possibility = BestMatch(temp)
+        
+
+        
+        print("NEW STATE")
+        print("Se va a expandir en la posición :")
+        print(str(row)+","+str(column))
+        print("Estado actual")
+        print(StringToArray(state))
+        print("Con las siguientes posibilidades")
+        print(list(possibility))
+        
+        return list(possibility)
         
         
+    def result(self,state,action):
+        temp= StringToArray(state)
+        
+        
+        row,column,possibility = BestMatch(temp)
+        
+        temp[row][column]=action
+        
+        state= ArrayToString(temp)
+        return state
+        
+        
+    def cost(self,state,action,state2):
+        return 1
+    
+    def is_goal(self, state):
+        temp= StringToArray(state)
+        return IsComplete(temp)
+
+    def heuristic(self, state):
+        
+        h=0
+        
+        temp= StringToArray(state)
+        for x in range (0,6):
+            for y in range(0,6):
+                if temp[x][y] == 0 :
+                    h=h+1
+        return h
+                
+   
+     
+class SudokuXProblem2(SearchProblem):
+    
+    def actions(self,state):
+        temp= StringToArray(state)
         row,column = NextEmptyCell(temp)
         
         numRow=PossibleInRow(row,temp)
@@ -196,9 +245,6 @@ class SudokuXProblem(SearchProblem):
     def result(self,state,action):
         temp= StringToArray(state)
         
-        """
-        row,column = BestMatch(temp)
-        """
         row,column = NextEmptyCell(temp)
         
         temp[row][column]=action
@@ -223,10 +269,9 @@ class SudokuXProblem(SearchProblem):
             for y in range(0,6):
                 if temp[x][y] == 0 :
                     h=h+1
-        return h
-                
-   
-     
+        return h        
+    
+
 is1="0,5,0,0,0,0;6,0,3,0,0,0;0,3,0,0,0,0;0,0,0,0,6,0;0,0,0,6,0,1;0,0,0,0,2,0"
 is2="0,0,1,0,0,0;0,0,0,6,0,0;1,0,0,0,3,0;0,4,0,0,0,2;0,0,2,0,0,0;0,0,0,2,0,0"
 is3="0,0,3,0,0,0;1,0,0,0,0,0;0,2,0,0,0,1;5,0,0,0,4,0;0,0,0,0,0,4;0,0,0,5,0,0"
@@ -234,19 +279,36 @@ is4="0,0,0,3,0,0;0,0,3,0,0,0;2,0,0,0,5,0;0,3,0,0,0,1;0,0,0,6,0,0;0,0,4,0,0,0"
 is5="0,2,0,0,0,0;4,0,6,0,0,0;0,1,0,0,0,0;0,0,0,0,4,0;0,0,0,4,0,5;0,0,0,0,3,0"
 
 
-
+"""
+HEURISTICA CASILLA CON MENOS POSIBILIDADES
+"""
 millis = int(round(time.time() * 1000))
-my_problem = SudokuXProblem(initial_state=is1)
-result = astar(my_problem)
-
-print(result)
-
+my_problem = SudokuXProblem(initial_state=is2)
+result1 = astar(my_problem)
 millis2 = int(round(time.time() * 1000))
+Tiempo_1 =millis2-millis
 
-print(millis2-millis)
+
+
+"""
+HEURISTICA DE LA PRIMERA CASILLA VACIA 
+"""
+millis = int(round(time.time() * 1000))
+my_problem = SudokuXProblem2(initial_state=is2)
+result2 = astar(my_problem)
+millis2 = int(round(time.time() * 1000))
+Tiempo_2 =millis2-millis
+
+
+
+print('Tiempo de la 1 heuristica ',Tiempo_1)
+print(result1)
+print('Tiempo de la 2 heuristica ',Tiempo_2)
+print(result2)
+
 """
 for action, state in result.path():
     print('Insert number', action)
     print(StringToArray(state))
-"""    
+"""   
    
