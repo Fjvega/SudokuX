@@ -2,19 +2,17 @@
 """
 Created on Fri Mar 15 11:00:03 2019
 
-@author: Francisco
+@author: Francisco Vega & Alejandro Ortega
 """
 
 from simpleai.search import SearchProblem, astar
-"""
-from __future__ import print_function
-"""
 import numpy as np
 import time
 
 """
 CONDICIONES Y UTILIDADES
 """
+#Conversion String a Matriz
 def StringToArray(string):
     my_list =np.zeros((6,6))
     row=0
@@ -31,11 +29,10 @@ def StringToArray(string):
             else:
                 my_list[row,column]=x
                 column=column+1
-               
-        
-        
+                
     return my_list
 
+#Conversion Matriz a String
 def ArrayToString(my_list):
     converter =""
     for x in range (0,6):
@@ -47,10 +44,10 @@ def ArrayToString(my_list):
                     converter=converter+str(int(my_list[x][y]))+";"
                 else:
                      converter=converter+str(int(my_list[x][y]))
-    return converter   
-
+    return converter  
+ 
+#Condicional Filas
 def PossibleInRow(row,table):
-    
     possibility = list(range(1,7))
     _myList = []
     for x in range (0,6):
@@ -59,8 +56,8 @@ def PossibleInRow(row,table):
     
     return set(possibility)-set(_myList)
  
+#Condicional Columna
 def PossibleInColumn(column,table):
-    
     possibility = list(range(1,7))
     _myList = []
     for x in range (0,6):
@@ -69,7 +66,7 @@ def PossibleInColumn(column,table):
     
     return set(possibility)-set(_myList)       
     
- 
+#Condicional Diagonales
 def PossibleInDiag(temp, row, col):
     diag="1,0,0,0,0,2;0,1,0,0,2,0;0,0,1,2,0,0;0,0,2,1,0,0;0,2,0,0,1,0;2,0,0,0,0,1"
     tg= StringToArray(diag)
@@ -87,6 +84,7 @@ def PossibleInDiag(temp, row, col):
     else:
         return emptySet
 
+#Condicional Grupos
 def PossibleInGroup(temp,row,col):
     groups="1,1,1,2,2,2;1,1,1,2,2,2;3,3,3,4,4,4;3,3,3,4,4,4;5,5,5,6,6,6;5,5,5,6,6,6"
     tg= StringToArray(groups)
@@ -101,22 +99,22 @@ def PossibleInGroup(temp,row,col):
                 Actual.append(temp[x][y])
     return set(Poss)-set(Actual)  
 
-
-            
-
-            
-            
+#Verificacion de Estado Objetivo
 def IsComplete(table):
     if table.all() == 0:
         return False
     return True
-    '''for x in range (0,6):
-        for y in range (0,6):
-            if(table[x][y]==0):
-                return False
-    
-    return True'''
 
+#Buscador de primera casilla vacia (Heuristica 1)
+def NextEmptyCell(table):
+    
+    for row in range (0,6):
+        for column in range(0,6):
+            if(table[row][column]==0):
+                return row,column
+            
+
+#Buscador de casilla con menos posibilidades (Heuristica 2)
 def BestMatch(temp):
     """
     temp= StringToArray(state)
@@ -146,21 +144,73 @@ def BestMatch(temp):
                     rpossibility =possibility
     
     return rr,rc,rpossibility
+     
     
-def NextEmptyCell(table):
-    
-    for row in range (0,6):
-        for column in range(0,6):
-            if(table[row][column]==0):
-                return row,column
-            
-            
 """
 SIMPLE IA CODE
 """
-
-
+#SIMPLE IA Code para Heuristica 1
 class SudokuXProblem(SearchProblem):
+    
+    def actions(self,state):
+        temp= StringToArray(state)
+        row,column = NextEmptyCell(temp)
+        
+        numRow=PossibleInRow(row,temp)
+        numColumn=PossibleInColumn(column,temp)
+        numGroup=PossibleInGroup(temp,row,column)
+        numDiag = PossibleInDiag(temp,row,column)
+        
+
+        print("NEW STATE")
+        print("Se va a expandir en la posición :")
+        print(str(row)+","+str(column))
+
+        
+        if numDiag.__len__() != 0:
+            possibility=numRow.intersection(numColumn,numGroup,numDiag)
+        else:
+            possibility=numRow.intersection(numColumn,numGroup)
+
+        print("Estado actual")
+        print(StringToArray(state))
+        print("Con las siguientes posibilidades")
+        print(list(possibility))
+
+        return list(possibility)
+        
+        
+    def result(self,state,action):
+        temp= StringToArray(state)
+        
+        row,column = NextEmptyCell(temp)
+        
+        temp[row][column]=action
+        
+        state= ArrayToString(temp)
+        return state
+        
+        
+    def cost(self,state,action,state2):
+        return 1
+    
+    def is_goal(self, state):
+        temp= StringToArray(state)
+        return IsComplete(temp)
+
+    def heuristic(self, state):
+        
+        h=0
+        
+        temp= StringToArray(state)
+        for x in range (0,6):
+            for y in range(0,6):
+                if temp[x][y] == 0 :
+                    h=h+1
+        return h
+    
+#SIMPLE IA Code para Heuristica 2
+class SudokuXProblem2(SearchProblem):
     
     def actions(self,state):
         temp= StringToArray(state)
@@ -169,7 +219,7 @@ class SudokuXProblem(SearchProblem):
         row,column,possibility = BestMatch(temp)
         
 
-        
+
         print("NEW STATE")
         print("Se va a expandir en la posición :")
         print(str(row)+","+str(column))
@@ -177,7 +227,7 @@ class SudokuXProblem(SearchProblem):
         print(StringToArray(state))
         print("Con las siguientes posibilidades")
         print(list(possibility))
-        
+
         return list(possibility)
         
         
@@ -213,65 +263,9 @@ class SudokuXProblem(SearchProblem):
                 
    
      
-class SudokuXProblem2(SearchProblem):
+        
     
-    def actions(self,state):
-        temp= StringToArray(state)
-        row,column = NextEmptyCell(temp)
-        
-        numRow=PossibleInRow(row,temp)
-        numColumn=PossibleInColumn(column,temp)
-        numGroup=PossibleInGroup(temp,row,column)
-        numDiag = PossibleInDiag(temp,row,column)
-        
-        print("NEW STATE")
-        print("Se va a expandir en la posición :")
-        print(str(row)+","+str(column))
-        
-        
-        if numDiag.__len__() != 0:
-            possibility=numRow.intersection(numColumn,numGroup,numDiag)
-        else:
-            possibility=numRow.intersection(numColumn,numGroup)
-        
-        print("Estado actual")
-        print(StringToArray(state))
-        print("Con las siguientes posibilidades")
-        print(list(possibility))
-        
-        return list(possibility)
-        
-        
-    def result(self,state,action):
-        temp= StringToArray(state)
-        
-        row,column = NextEmptyCell(temp)
-        
-        temp[row][column]=action
-        
-        state= ArrayToString(temp)
-        return state
-        
-        
-    def cost(self,state,action,state2):
-        return 1
-    
-    def is_goal(self, state):
-        temp= StringToArray(state)
-        return IsComplete(temp)
-
-    def heuristic(self, state):
-        
-        h=0
-        
-        temp= StringToArray(state)
-        for x in range (0,6):
-            for y in range(0,6):
-                if temp[x][y] == 0 :
-                    h=h+1
-        return h        
-    
-
+#Casos de Prueba Sudoku X
 is1="0,5,0,0,0,0;6,0,3,0,0,0;0,3,0,0,0,0;0,0,0,0,6,0;0,0,0,6,0,1;0,0,0,0,2,0"
 is2="0,0,1,0,0,0;0,0,0,6,0,0;1,0,0,0,3,0;0,4,0,0,0,2;0,0,2,0,0,0;0,0,0,2,0,0"
 is3="0,0,3,0,0,0;1,0,0,0,0,0;0,2,0,0,0,1;5,0,0,0,4,0;0,0,0,0,0,4;0,0,0,5,0,0"
@@ -279,36 +273,35 @@ is4="0,0,0,3,0,0;0,0,3,0,0,0;2,0,0,0,5,0;0,3,0,0,0,1;0,0,0,6,0,0;0,0,4,0,0,0"
 is5="0,2,0,0,0,0;4,0,6,0,0,0;0,1,0,0,0,0;0,0,0,0,4,0;0,0,0,4,0,5;0,0,0,0,3,0"
 
 
-"""
-HEURISTICA CASILLA CON MENOS POSIBILIDADES
-"""
-millis = int(round(time.time() * 1000))
-my_problem = SudokuXProblem(initial_state=is2)
+
+#HEURISTICA DE LA PRIMERA CASILLA VACIA 
+millis_h1 = int(round(time.time() * 1000))
+my_problem = SudokuXProblem(initial_state=is3)
 result1 = astar(my_problem)
-millis2 = int(round(time.time() * 1000))
-Tiempo_1 =millis2-millis
+millis_h12 = int(round(time.time() * 1000))
+Tiempo_Primera_Vacia =millis_h12-millis_h1
 
 
 
-"""
-HEURISTICA DE LA PRIMERA CASILLA VACIA 
-"""
-millis = int(round(time.time() * 1000))
-my_problem = SudokuXProblem2(initial_state=is2)
+#HEURISTICA CASILLA CON MENOS POSIBILIDADES
+millis_h2 = int(round(time.time() * 1000))
+my_problem = SudokuXProblem2(initial_state=is3)
 result2 = astar(my_problem)
-millis2 = int(round(time.time() * 1000))
-Tiempo_2 =millis2-millis
+millis_h22 = int(round(time.time() * 1000))
+Tiempo_Menos_Posibilidades =millis_h22-millis_h2
 
 
-
-print('Tiempo de la 1 heuristica ',Tiempo_1)
+#Muestreo de resultados obtenidos
+print('Tiempo de la 1 heuristica ',Tiempo_Primera_Vacia)
 print(result1)
-print('Tiempo de la 2 heuristica ',Tiempo_2)
+print('Tiempo de la 2 heuristica ',Tiempo_Menos_Posibilidades)
 print(result2)
 
-"""
-for action, state in result.path():
+
+'''
+for action, state in result1.path():
     print('Insert number', action)
     print(StringToArray(state))
-"""   
-   
+ 
+'''
+
