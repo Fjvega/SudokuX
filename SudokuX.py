@@ -116,9 +116,7 @@ def NextEmptyCell(table):
 
 #Buscador de casilla con menos posibilidades (Heuristica 2)
 def BestMatch(temp):
-    """
-    temp= StringToArray(state)
-    """
+
     bestmatch = 999
     rr=0
     rc=0
@@ -161,22 +159,24 @@ class SudokuXProblem(SearchProblem):
         numGroup=PossibleInGroup(temp,row,column)
         numDiag = PossibleInDiag(temp,row,column)
         
-
+       
         print("NEW STATE")
         print("Se va a expandir en la posición :")
         print(str(row)+","+str(column))
-
+        
         
         if numDiag.__len__() != 0:
             possibility=numRow.intersection(numColumn,numGroup,numDiag)
         else:
             possibility=numRow.intersection(numColumn,numGroup)
-
+            
+           
         print("Estado actual")
         print(StringToArray(state))
         print("Con las siguientes posibilidades")
         print(list(possibility))
-
+       
+        
         return list(possibility)
         
         
@@ -219,7 +219,7 @@ class SudokuXProblem2(SearchProblem):
         row,column,possibility = BestMatch(temp)
         
 
-
+      
         print("NEW STATE")
         print("Se va a expandir en la posición :")
         print(str(row)+","+str(column))
@@ -227,7 +227,7 @@ class SudokuXProblem2(SearchProblem):
         print(StringToArray(state))
         print("Con las siguientes posibilidades")
         print(list(possibility))
-
+        
         return list(possibility)
         
         
@@ -274,21 +274,26 @@ is5="0,2,0,0,0,0;4,0,6,0,0,0;0,1,0,0,0,0;0,0,0,0,4,0;0,0,0,4,0,5;0,0,0,0,3,0"
 
 
 
+
+
+
+
+
 #HEURISTICA DE LA PRIMERA CASILLA VACIA 
 millis_h1 = int(round(time.time() * 1000))
-my_problem = SudokuXProblem(initial_state=is3)
-result1 = astar(my_problem)
+my_problem2 = SudokuXProblem(initial_state=is2)
+result1 = astar(my_problem2)
 millis_h12 = int(round(time.time() * 1000))
 Tiempo_Primera_Vacia =millis_h12-millis_h1
 
 
-
 #HEURISTICA CASILLA CON MENOS POSIBILIDADES
 millis_h2 = int(round(time.time() * 1000))
-my_problem = SudokuXProblem2(initial_state=is3)
+my_problem = SudokuXProblem2(initial_state=is2)
 result2 = astar(my_problem)
 millis_h22 = int(round(time.time() * 1000))
 Tiempo_Menos_Posibilidades =millis_h22-millis_h2
+
 
 
 #Muestreo de resultados obtenidos
@@ -298,6 +303,7 @@ print('Tiempo de la 2 heuristica ',Tiempo_Menos_Posibilidades)
 print(result2)
 
 
+#En caso de ver cual fue el camino para la solución con la heuristica 1 descomente el siguiente bloque
 '''
 for action, state in result1.path():
     print('Insert number', action)
@@ -305,3 +311,9 @@ for action, state in result1.path():
  
 '''
 
+#En caso de ver cual fue el camino para la solución con la heuristica 2 descomente el siguiente bloque
+'''
+for action, state in result2.path():
+    print('Insert number', action)
+    print(StringToArray(state))
+'''
